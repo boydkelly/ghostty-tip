@@ -1,0 +1,52 @@
+name: Check upstream Ghostty
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check-upstream:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check upstream version
+        id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          upstream="$(
+            curl -fsSL \
+              https://github.com/ghostty-org/ghostty/releases/download/tip/ghostty-source.tar.gz |
+            tar xzf - -O --wildcards '*/VERSION' 2>/dev/null |
+            tr -d '[:space:]'
+          )"
+
+          current="$(cat upstream-version 2>/dev/null || true)"
+
+          echo "Current:  ${current:-<none>}"
+          echo "Upstream: $upstream"
+
+          if [[ "$upstream" == "$current" ]]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          printf '%s\n' "$upstream" > upstream-version
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Commit upstream version
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add upstream-version
+          git commit -m "Update Ghostty to $(cat upstream-version)"
+          git push
