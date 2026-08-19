@@ -1,16 +1,35 @@
 name: Trigger COPR build
+
 on:
   schedule:
     - cron: "0 3 * * *"
+
   push:
     branches:
       - main
+
   workflow_dispatch:
+
 jobs:
   trigger:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Trigger COPR
+      - name: Check webhook secret
+        env:
+          COPR_WEBHOOK_URL: ${{ secrets.COPR_WEBHOOK_URL }}
+        run: |
+          set -euo pipefail
+
+          printf 'length: %s\n' "${#COPR_WEBHOOK_URL}"
+
+          printf 'starts with https: '
+          [[ "$COPR_WEBHOOK_URL" == https://* ]] && echo yes || echo no
+
+          printf 'ends with slash: '
+          [[ "$COPR_WEBHOOK_URL" == */ ]] && echo yes || echo no
+
+      - name: Trigger COPR build
         env:
           COPR_WEBHOOK_URL: ${{ secrets.COPR_WEBHOOK_URL }}
         run: |
