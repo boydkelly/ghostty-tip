@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# backward compat since cached function went away
+# https://pagure.io/rpkg-util/c/bb62554c62fd52224709e861c2353a5c15b50220?branch=main
+function cached {
+  declare v=${OUTPUT[$1]}
+  [[ -n $v ]] && echo -n "$v"
+}
+
+function abort {
+  echo "ABORT: $*" >&2
+  exit 1
+}
+
+# --- ghostty nightly (tarball-sourced) macros ---
+# No git required: the version is read from the tip source tarball's
+# top-level VERSION file, and the changelog date is simply today.
+
+function ghostty_version {
+  cached ghostty_version && return
+  declare v
+  v=$(curl -sL https://github.com/ghostty-org/ghostty/releases/download/tip/ghostty-source.tar.gz |
+    tar xzf - -O --wildcards '*/VERSION' 2>/dev/null | tr -d '[:space:]')
+  # RPM forbids '-' in Version -> use '~' (via a variable so bash
+  # doesn't tilde-expand it into $HOME)
+  declare tilde='~'
+  v=${v//-/$tilde}
+  [[ -n $v ]] || abort "failed to determine ghostty version from tarball"
+  output "$v"
+}
+
+function ghostty_release {
+  cached ghostty_release && return
+  output "1"
+}
+
+function ghostty_changelog_date {
+  cached ghostty_changelog_date && return
+  output "$(date +'%a %b %d %Y')"
+}
