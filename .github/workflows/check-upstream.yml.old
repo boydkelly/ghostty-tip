@@ -1,0 +1,41 @@
+name: Trigger COPR build
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install copr-cli
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y python3-pip
+          pip3 install copr-cli
+      - name: Configure COPR token
+        env:
+          COPR_TOKEN: ${{ secrets.COPR_TOKEN }}
+          COPR_LOGIN: ${{ secrets.COPR_LOGIN }}
+          COPR_USERNAME: ${{ secrets.COPR_USERNAME }}
+        run: |
+          mkdir -p ~/.config
+          cat > ~/.config/copr << EOF
+          [copr-cli]
+          login = ${COPR_LOGIN}
+          username = ${COPR_USERNAME}
+          token = ${COPR_TOKEN}
+          copr_url = https://copr.fedorainfracloud.org
+          EOF
+      - name: Trigger COPR build via copr-cli
+        run: |
+          copr-cli build-package --name ghostty ghostty-tip
+      - name: Trigger COPR webhook
+        env:
+          COPR_WEBHOOK_URL: ${{ secrets.COPR_WEBHOOK_URL }}
+        run: |
+          curl --fail --silent --show-error \
+            -X POST \
+            "$COPR_WEBHOOK_URL"

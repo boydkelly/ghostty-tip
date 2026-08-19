@@ -11,6 +11,6 @@ jobs:
         env:
           COPR_WEBHOOK_URL: ${{ secrets.COPR_WEBHOOK_URL }}
         run: |
-          curl --fail --silent --show-error \
+          curl \
             -X POST \
             "$COPR_WEBHOOK_URL"
