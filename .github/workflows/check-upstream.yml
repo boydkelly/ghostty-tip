@@ -29,6 +29,4 @@ jobs:
         run: |
           curl --fail --silent --show-error \
             -X POST \
-            -H 'Content-Type: application/json' \
-            -d '{"ref":"refs/heads/main"}' \
             "$COPR_WEBHOOK_URL"
