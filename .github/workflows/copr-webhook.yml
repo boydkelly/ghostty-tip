@@ -1,0 +1,16 @@
+name: Push COPR build
+on:
+  push:
+    branches:
+      - main
+jobs:
+  webhook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger COPR build
+        env:
+          COPR_WEBHOOK_URL: ${{ secrets.COPR_WEBHOOK_URL }}
+        run: |
+          curl --fail --silent --show-error \
+            -X POST \
+            "$COPR_WEBHOOK_URL"
