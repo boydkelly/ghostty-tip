@@ -15,22 +15,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install copr-cli
-        run: |
-          python3 -m pip install copr-cli
-
-      - name: Configure COPR
+      - name: Check webhook secret
         env:
-          COPR_LOGIN: ${{ secrets.COPR_LOGIN }}
-          COPR_TOKEN: ${{ secrets.COPR_TOKEN }}
+          COPR_WEBHOOK_URL: ${{ secrets.COPR_WEBHOOK_URL }}
         run: |
-          mkdir -p ~/.config/copr
-          cat > ~/.config/copr/config <<EOF
-          [copr-cli]
-          login = $COPR_LOGIN
-          token = $COPR_TOKEN
-          EOF
+          set -euo pipefail
+
+          printf 'length: %s\n' "${#COPR_WEBHOOK_URL}"
+
+          printf 'starts with https: '
+          [[ "$COPR_WEBHOOK_URL" == https://* ]] && echo yes || echo no
+
+          printf 'ends with slash: '
+          [[ "$COPR_WEBHOOK_URL" == */ ]] && echo yes || echo no
 
       - name: Trigger COPR build
+        env:
+          COPR_WEBHOOK_URL: ${{ secrets.COPR_WEBHOOK_URL }}
         run: |
-          copr-cli build-package boydkelly/ghostty-tip --name ghostty
+          curl --fail --silent --show-error \
+            -X POST \
+            "$COPR_WEBHOOK_URL"
