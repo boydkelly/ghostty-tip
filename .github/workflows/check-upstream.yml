@@ -2,24 +2,37 @@ name: Trigger COPR build
 on:
   schedule:
     - cron: "0 3 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
 jobs:
   trigger:
     runs-on: ubuntu-latest
     steps:
-      - name: Check webhook secret
-        env:
-          COPR_WEBHOOK_URL: ${{ secrets.COPR_WEBHOOK_URL }}
+      - name: Install copr-cli
         run: |
-          set -euo pipefail
-
-          printf 'length: %s\n' "${#COPR_WEBHOOK_URL}"
-
-          printf 'starts with https: '
-          [[ "$COPR_WEBHOOK_URL" == https://* ]] && echo yes || echo no
-
-          printf 'ends with slash: '
-          [[ "$COPR_WEBHOOK_URL" == */ ]] && echo yes || echo no
-      - name: Trigger COPR build
+          sudo apt-get update -q
+          sudo apt-get install -y python3-pip
+          pip3 install copr-cli
+      - name: Configure COPR token
+        env:
+          COPR_TOKEN: ${{ secrets.COPR_TOKEN }}
+          COPR_LOGIN: ${{ secrets.COPR_LOGIN }}
+          COPR_USERNAME: ${{ secrets.COPR_USERNAME }}
+        run: |
+          mkdir -p ~/.config
+          cat > ~/.config/copr << EOF
+          [copr-cli]
+          login = ${COPR_LOGIN}
+          username = ${COPR_USERNAME}
+          token = ${COPR_TOKEN}
+          copr_url = https://copr.fedorainfracloud.org
+          EOF
+      - name: Trigger COPR build via copr-cli
+        run: |
+          copr-cli build-package --name ghostty ghostty-tip
+      - name: Trigger COPR webhook
         env:
           COPR_WEBHOOK_URL: ${{ secrets.COPR_WEBHOOK_URL }}
         run: |
