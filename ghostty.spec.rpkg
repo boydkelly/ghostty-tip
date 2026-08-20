@@ -22,7 +22,7 @@ BuildRequires:  libadwaita-devel
 BuildRequires:  oniguruma-devel
 BuildRequires:  pkg-config
 BuildRequires:  gettext
-BuildRequires:  pandoc-cli
+BuildRequires:  pandoc
 BuildRequires:  zig
 
 # The global definitions align with rpmmacros used by the upstream
