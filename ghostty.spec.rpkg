@@ -17,44 +17,26 @@ License:        BSD-2-Clause
 URL:            https://github.com/ghostty-org/ghostty
 Source0:        https://github.com/ghostty-org/ghostty/releases/download/tip/ghostty-source.tar.gz
 
-# Toolchain dependencies common to all distributions
-BuildRequires:  pandoc
+# Common dependenciess
 BuildRequires:  zig
 
-# Distribution-specific dependencies
+# Distribution-specific
 %if 0%{?suse_version}
-BuildRequires:  gettext-tools
 BuildRequires:  pkgconfig
-BuildRequires:  pkgconfig(fontconfig)
-BuildRequires:  pkgconfig(freetype2)
-BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(gtk4)
 BuildRequires:  pkgconfig(gtk4-layer-shell-0)
-BuildRequires:  pkgconfig(harfbuzz)
 BuildRequires:  pkgconfig(libadwaita-1)
-BuildRequires:  pkgconfig(libpng)
 BuildRequires:  pkgconfig(oniguruma)
-BuildRequires:  pkgconfig(pixman-1)
-BuildRequires:  pkgconfig(zlib)
+BuildRequires:  gettext-tools
+BuildRequires:  pandoc
 %else
-BuildRequires:  blueprint-compiler
-BuildRequires:  fontconfig-devel
-BuildRequires:  freetype-devel
-BuildRequires:  gettext
-BuildRequires:  glib2-devel
-BuildRequires:  glslang-devel
 BuildRequires:  gtk4-devel
 BuildRequires:  gtk4-layer-shell-devel
-BuildRequires:  harfbuzz-devel
 BuildRequires:  libadwaita-devel
-BuildRequires:  libpng-devel
-BuildRequires:  libxml2-devel
 BuildRequires:  oniguruma-devel
-BuildRequires:  pixman-devel
 BuildRequires:  pkg-config
-BuildRequires:  simdutf-devel
-BuildRequires:  wayland-protocols-devel
-BuildRequires:  zlib-ng-devel
+BuildRequires:  gettext
+BuildRequires:  pandoc-cli
 %endif
 
 %global _product_license BSD-2-Clause
@@ -85,7 +67,6 @@ for archive in "$ZIG_GLOBAL_CACHE_DIR/p"/*.tar.gz; do
     fi
 done
 
-# Convert caretaker notation to SemVer build metadata for Zig
 v="%{version}-%{release}"
 v="${v/^/+}"
 DESTDIR="%{buildroot}" \
@@ -99,12 +80,10 @@ zig build \
     -Dpie=true \
     -Demit-docs
 
-# Fedora 42+ ncurses-term conflict workaround
 %if 0%{?fedora} >= 42
 rm -rf "%{buildroot}%{_datadir}/terminfo"
 %endif
 
-# Remove libghostty artifacts not intended for installation
 rm -f "%{buildroot}%{_libdir}/libghostty"* "%{buildroot}/usr/lib/libghostty"*
 
 # Collect installed file paths
