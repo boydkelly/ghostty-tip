@@ -19,6 +19,7 @@ Source0:        https://github.com/ghostty-org/ghostty/releases/download/tip/gho
 BuildRequires:  gtk4-devel
 BuildRequires:  gtk4-layer-shell-devel
 BuildRequires:  libadwaita-devel
+BuildRequires:  oniguruma-devel
 BuildRequires:  pkg-config
 BuildRequires:  gettext
 BuildRequires:  pandoc
