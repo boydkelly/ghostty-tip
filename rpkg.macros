@@ -19,8 +19,7 @@ function ghostty_version {
     tar xzf - -O --wildcards '*/VERSION' 2>/dev/null | tr -d '[:space:]')
   # RPM forbids '-' in Version -> use '~' (via a variable so bash
   # doesn't tilde-expand it into $HOME)
-  declare tilde='~'
-  v=${v//-/$tilde}
+  v=$(echo "$v" | sed -E 's/[-+]+/\./g' | sed 's/\./^/3')
   [[ -n $v ]] || abort "failed to determine ghostty version from tarball"
   output "$v"
 }

@@ -58,7 +58,7 @@ for archive in "$ZIG_GLOBAL_CACHE_DIR/p"/*.tar.gz; do
 done
 # Ghostty's Zig build performs compilation and installation together.
 # Stage the result into the RPM buildroot.
-v="%{version}"
+v="%{version}-%{release}"
 v="${v/^/+}"      # 1.3.2^9ae02a3 -> 1.3.2+9ae02a3  (real literal caret, not tilde-expansion)
 DESTDIR="%{buildroot}" \
 zig build \
