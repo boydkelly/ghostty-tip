@@ -66,15 +66,14 @@ for archive in "$ZIG_GLOBAL_CACHE_DIR/p"/*.tar.gz; do
         tar -xzf "$archive" -C "$target_dir" --strip-components=1
     fi
 done
-
-v="%{version}-%{release}"
-v="${v/^/+}"
+ # Ghostty's Zig build performs compilation and installation together.
+ # Stage the result into the RPM buildroot.
 DESTDIR="%{buildroot}" \
 zig build \
     --summary all \
     --prefix "%{_prefix}" \
     --system "$ZIG_GLOBAL_CACHE_DIR/p" \
-    -Dversion-string="$v" \
+    -Dversion-string="%{ghostty_buildid}" \
     -Doptimize=ReleaseFast \
     -Dcpu=baseline \
     -Dpie=true \

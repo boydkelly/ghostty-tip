@@ -12,17 +12,46 @@ function abort {
   exit 1
 }
 
-function ghostty_version {
-  cached ghostty_version && return
+# --- version source of truth, fetched once ---
+function _ghostty_raw {
+  cached _ghostty_raw && return
   declare v
   v=$(curl -sL https://github.com/ghostty-org/ghostty/releases/download/tip/ghostty-source.tar.gz |
     tar xzf - -O --wildcards '*/VERSION' 2>/dev/null | tr -d '[:space:]')
-  # RPM forbids '-' in Version -> use '~' (via a variable so bash
-  # doesn't tilde-expand it into $HOME)
-  v=$(echo "$v" | sed -E 's/[-+]+/\./g' | sed 's/\./^/3')
   [[ -n $v ]] || abort "failed to determine ghostty version from tarball"
-  output "$v"
+  # 1.3.2-main-+88f57ee
+  [[ $v =~ ^([0-9.]+)-([^-]+)-\+?([0-9a-f]+)$ ]] || abort "unexpected VERSION format: $v"
+  output "${BASH_REMATCH[1]} ${BASH_REMATCH[2]} ${BASH_REMATCH[3]}"
 }
+
+# RPM Version: tag -- must sort monotonically, date-prefixed
+function ghostty_version {
+  cached ghostty_version && return
+  declare version _branch hash datestamp
+  read -r version _branch hash < <(_ghostty_raw)
+  datestamp=$(date -u +%Y%m%d%H%M)
+  output "${version}^${datestamp}.g${hash}"
+}
+
+# embedded/user-facing build id -- clean, no date, just upstream+hash
+function ghostty_buildid {
+  cached ghostty_buildid && return
+  declare version _branch hash
+  read -r version _branch hash < <(_ghostty_raw)
+  output "${version}+${hash}"
+}
+
+# function ghostty_version {
+#   cached ghostty_version && return
+#   declare v
+#   v=$(curl -sL https://github.com/ghostty-org/ghostty/releases/download/tip/ghostty-source.tar.gz |
+#     tar xzf - -O --wildcards '*/VERSION' 2>/dev/null | tr -d '[:space:]')
+#   # RPM forbids '-' in Version -> use '~' (via a variable so bash
+#   # doesn't tilde-expand it into $HOME)
+#   v=$(echo "$v" | sed -E 's/[-+]+/\./g' | sed 's/\./^/3')
+#   [[ -n $v ]] || abort "failed to determine ghostty version from tarball"
+#   output "$v"
+# }
 
 function ghostty_release {
   cached ghostty_release && return
