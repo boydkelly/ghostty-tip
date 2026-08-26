@@ -73,7 +73,7 @@ zig build \
     --summary all \
     --prefix "%{_prefix}" \
     --system "$ZIG_GLOBAL_CACHE_DIR/p" \
-    -Dversion-string="%{ghostty_buildid}" \
+    -Dversion-string="%{{{ghostty_buildid}}}" \
     -Doptimize=ReleaseFast \
     -Dcpu=baseline \
     -Dpie=true \
