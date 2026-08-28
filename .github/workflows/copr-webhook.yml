@@ -1,4 +1,4 @@
-name: Push COPR build
+name: webhook COPR build
 on:
   push:
     branches:
