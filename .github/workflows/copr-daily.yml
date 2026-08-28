@@ -1,7 +1,8 @@
 name: Daily COPR build
 on:
   schedule:
-    - cron: "30 7 * * *"
+    - cron: "47 3 * * *"
+    - cron: "17 9 * * *"  # backup tick, different hour
   workflow_dispatch:
 jobs:
   copr-cli:
