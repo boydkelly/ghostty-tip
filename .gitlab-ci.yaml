@@ -1,0 +1,20 @@
+image: alpine:latest
+copr-build:
+  stage: build
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+  before_script:
+    - apk add --no-cache python3 py3-pip
+    - pip3 install --break-system-packages copr-cli || pip3 install copr-cli
+  script:
+    - mkdir -p ~/.config
+    - |
+      cat <<EOF > ~/.config/copr
+      [copr-cli]
+      login = ${COPR_LOGIN}
+      username = ${COPR_USERNAME}
+      token = ${COPR_TOKEN}
+      copr_url = https://copr.fedorainfracloud.org
+      EOF
+    - copr-cli build-package --name ghostty ghostty-tip
