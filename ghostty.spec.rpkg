@@ -37,6 +37,7 @@ BuildRequires:  oniguruma-devel
 BuildRequires:  pkg-config
 BuildRequires:  gettext
 BuildRequires:  pandoc-cli
+BuildRequires:  mesa-libEGL-devel
 %endif
 
 %global _product_license BSD-2-Clause
