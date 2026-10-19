@@ -17,4 +17,4 @@ copr-build:
       token = ${COPR_TOKEN}
       copr_url = https://copr.fedorainfracloud.org
       EOF
-    - copr-cli build-package --name ghostty ghostty-tip
+    - copr-cli build-package --nowait --name ghostty ghostty-tip
